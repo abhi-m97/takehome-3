@@ -1,107 +1,114 @@
-# Take-Home Assessment: Learner Progress MVP
+# Learner Progress MVP
 
-**Expected effort:** about **2 hours** of focused work  
-**Window:** **24 hours** from when you receive this prompt — that is a deadline, not an invitation to over-build  
-**AI policy:** **On** — Cursor, Claude, Copilot, and similar tools are encouraged  
-**Stack:** TypeScript backend + **pick one primary frontend: Angular or React**
+A thin "my progress" view for learners: their in-progress courses, how far along they are, when they last
+touched each one, and how long each has left. TypeScript/Express backend, **React** frontend.
 
-## Prerequisites
+- **Frontend used:** React (`frontend-react/`). The Angular starter (`frontend-angular/`) is left untouched and is not part of this submission's behaviour.
+- **Product thinking:** [`PRODUCT.md`](./PRODUCT.md) (problem, scope, the extra business rule, cuts, assumptions, what's next).
+- **How AI was used:** [`AI_USAGE.md`](./AI_USAGE.md).
+- **Original brief:** [`SPEC.md`](./SPEC.md).
 
-- **Node.js 20+** and **npm** (`node -v` — Node 18 will not run the Angular starter)
-- **Git** if you submit a repository (preferred)
-- **Ports 3001** (API) and **5173** (UI) free
-- About **2 hours** of focused time before the deadline
+## Run it locally
 
-You do not need Docker, a cloud account, or access to Docebo.
+Requires **Node.js 20+** and npm. Ports **3001** (API) and **5173** (UI) must be free.
 
-## What we're evaluating
+Terminal 1, the API:
 
-We care about **product judgment**, **full-stack craft**, and **how you use AI as a multiplier**. Angular and React are both first-class. We do not score which of those two you used.
+```bash
+cd backend && npm install && npm run dev
+```
 
-You'll walk us through your submission in a live evaluation session with AI off. Build something you can **explain, demo, and adapt on the spot**.
+Terminal 2, the UI:
 
-A working thin slice beats a polished half-feature.
+```bash
+cd frontend-react && npm install && npm run dev
+```
 
-## Getting started
+Open **http://localhost:5173**.
 
-1. Read [`SPEC.md`](./SPEC.md).
-2. Backend:
-   ```bash
-   cd backend && npm install && npm test && npm run dev
-   ```
-   Implement `src/services/progressService.ts` until tests pass.
-3. **Pick one frontend** (already talks to the API):
+Run the backend tests (68 tests) from `backend/`:
 
-   **Angular** (Docebo production stack):
-   ```bash
-   cd frontend-angular && npm install && npm run dev
-   ```
+```bash
+npm test
+```
 
-   **React** (Toronto market default):
-   ```bash
-   cd frontend-react && npm install && npm run dev
-   ```
+> The demo data's timestamps are generated when the API starts, so restart `npm run dev` in `backend/` before a demo
+> to get a fresh mix of recent and stale courses.
 
-   Open http://localhost:5173. Extend that starter — do not scaffold a third app.
-4. Copy [`PRODUCT.template.md`](./PRODUCT.template.md) → `PRODUCT.md` and [`AI_USAGE.template.md`](./AI_USAGE.template.md) → `AI_USAGE.md` in the repo root and fill them in as you work.
-5. Submit before your deadline.
+## What to look at
 
-## Required deliverables
+The **Scenario** dropdown (top right) stands in for a login and switches learner:
 
-| Deliverable | Purpose |
-|-------------|---------|
-| **Backend** | Starter in [`backend/`](./backend/README.md) — service logic, validation, **one extra business rule** beyond the tests |
-| **Frontend** | **One** of [`frontend-angular/`](./frontend-angular/README.md) or [`frontend-react/`](./frontend-react/README.md) — loading, error, and empty states; demoable without reading source |
-| **README** | How to run locally in under 5 commands |
-| **PRODUCT.md** | User problem, MVP scope, cuts, success metric, assumptions |
-| **AI_USAGE.md** | How you used AI; what you accepted, rejected, or changed |
+| Scenario | What it shows |
+|----------|---------------|
+| Learner 1 | Three in-progress courses, newest activity first. *Annual Compliance Refresh* has an **Inactive** badge (no activity for more than 30 days). |
+| Learner 2 | A single in-progress course. |
+| Learner 3 (completed only) | The **empty state**: no courses in progress, and no time filter offered. |
+| Unknown learner (404) | The **error state** for a learner that doesn't exist. |
+| Invalid ID (400) | The **error state** for a malformed learner ID. |
 
-## What we are *not* asking for
+Each card shows a progress bar and percentage, lessons done ("2 of 4 lessons"), an estimated time left
+("about 30 min left"), and when the learner was last active.
 
-- Docker, Kubernetes, or cloud deployment
-- CI/CD pipelines (bonus if present, not required)
-- Both frontends, or a new app from scratch
-- Pixel-perfect UI
-- Production-grade auth (a stub is fine — document it in `PRODUCT.md`)
+**Extra business rule: estimated time remaining.** The **Time available** slider (15, 30, 60 min, Any) keeps only
+courses that can be finished in that time. Try learner 1 at *15 min*: only the stale compliance course (5 minutes
+left) remains. Try learner 2 at *15 min* to see the "No courses fit" state and the **Show any length** button. The
+slider resets when you change learner.
 
-## AI usage
+**Loading state.** The API answers in milliseconds locally, so the skeleton is easy to miss. In Chrome DevTools open
+*Network*, pick **Slow 4G**, then switch scenario or move the slider.
 
-Use AI freely during the take-home. We **will** ask about it in the evaluation:
+**Experimental flag.** The **Experimental: next lesson preview** checkbox (top right, off by default) shows the next
+lesson and its length on each card. It is a demo-only stand-in for a feature flag and is not the assessed rule.
 
-- What did AI generate vs. what you wrote or rewrite?
-- What did you reject and why?
-- Can you explain and modify every part of your submission without AI?
+**Analytics.** Each successful load logs one structured JSON line (`course_progress_viewed`, with learner ID, course
+count, stale count and the active time filter) to the browser console.
 
-Copy-paste submissions you can't explain are a red flag.
+## API
 
-## Submission
+`GET /api/learners/:learnerId/progress[?maxMinutes=N]`
 
-Send **one** of the following before your deadline:
+```json
+{
+  "learnerId": 1,
+  "courses": [
+    {
+      "courseId": "course-leadership",
+      "title": "Leadership Essentials",
+      "completionPercentage": 33,
+      "lastActivityAt": "2026-10-02T18:47:43.087Z",
+      "status": "in_progress",
+      "lessonsCompleted": 1,
+      "lessonsTotal": 3,
+      "estimatedMinutesRemaining": 25,
+      "nextLesson": { "title": "Coaching conversations", "estimatedMinutes": 15 },
+      "isStale": false
+    }
+  ]
+}
+```
 
-1. **Git repository link** (GitHub, GitLab, etc.) — preferred  
-2. **Zip archive** of your project (exclude `node_modules`, vendor dirs, and build artifacts)
+- Only `in_progress` courses are returned, sorted by last activity (most recent first).
+- `maxMinutes` (optional, positive integer) keeps courses whose `estimatedMinutesRemaining` is at most N.
+- Errors: `400` for an invalid learner ID or `maxMinutes`, `404` for an unknown learner. Bodies look like `{ "error": "..." }`.
 
-Include in your submission email:
+Full details are in [`backend/README.md`](./backend/README.md).
 
-- Link or attachment
-- Frontend starter used (**Angular** or **React**)
-- Approximate time spent
-- Any known limitations or things you'd do with more time
+## Layout
 
-## After submission
+```
+backend/           Express + TypeScript API, seed data, Jest tests
+frontend-react/    Vite + React + TypeScript UI (the frontend used)
+frontend-angular/  Provided Angular starter, untouched
+PRODUCT.md         Product notes and decisions
+AI_USAGE.md        How AI was used
+SPEC.md            Original brief
+```
 
-We'll schedule a **45 minute evaluation interview** where you:
+## Known limitations
 
-- Demo your MVP and explain your architecture
-- Discuss product scope and tradeoffs
-- Make a small live change to your code (AI off)
-
-## Questions?
-
-If something in the spec is genuinely blocking, email your recruiter with:
-
-- What you're stuck on
-- What you've already assumed
-- A proposed resolution
-
-We won't answer implementation trivia, but we will clarify product intent if the spec is ambiguous in a way that blocks progress.
+- Data is in memory (a seed file); there are no writes.
+- Learner identity is a demo dropdown. The API does not check that the caller may view the requested learner (see `PRODUCT.md` for where that check would go).
+- Time estimates are approximate: lessons without a duration count as 10 minutes.
+- Analytics is a console stub behind a single `transport` function.
+- `npm audit` reports findings in the Jest test tooling (dev-only). Runtime dependencies are clean (`npm audit --omit=dev`).

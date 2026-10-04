@@ -18,10 +18,10 @@ export const enrollments: CourseEnrollment[] = [
     title: 'New Hire Onboarding',
     learnerId: 1,
     lessons: [
-      { id: 'l1', title: 'Welcome', completed: true },
-      { id: 'l2', title: 'Tools setup', completed: true },
-      { id: 'l3', title: 'Security basics', completed: false },
-      { id: 'l4', title: 'Team intro', completed: false },
+      { id: 'l1', title: 'Welcome', completed: true, estimatedDurationMinutes: 5 },
+      { id: 'l2', title: 'Tools setup', completed: true, estimatedDurationMinutes: 10 },
+      { id: 'l3', title: 'Security basics', completed: false, estimatedDurationMinutes: 20 },
+      { id: 'l4', title: 'Team intro', completed: false, estimatedDurationMinutes: 10 },
     ],
     lastActivityAt: daysAgo(4),
     status: 'in_progress',
@@ -31,8 +31,9 @@ export const enrollments: CourseEnrollment[] = [
     title: 'Leadership Essentials',
     learnerId: 1,
     lessons: [
-      { id: 'l1', title: 'Feedback frameworks', completed: true },
-      { id: 'l2', title: 'Coaching conversations', completed: false },
+      { id: 'l1', title: 'Feedback frameworks', completed: true, estimatedDurationMinutes: 20 },
+      { id: 'l2', title: 'Coaching conversations', completed: false, estimatedDurationMinutes: 15 },
+      // No duration on purpose: exercises the default.
       { id: 'l3', title: 'Delegation', completed: false },
     ],
     lastActivityAt: daysAgo(2),
@@ -43,8 +44,8 @@ export const enrollments: CourseEnrollment[] = [
     title: 'Annual Compliance Refresh',
     learnerId: 1,
     lessons: [
-      { id: 'l1', title: 'Policy overview', completed: true },
-      { id: 'l2', title: 'Quiz', completed: false },
+      { id: 'l1', title: 'Policy overview', completed: true, estimatedDurationMinutes: 10 },
+      { id: 'l2', title: 'Quiz', completed: false, estimatedDurationMinutes: 5 },
     ],
     lastActivityAt: daysAgo(54), // always > STALE_DAYS (30)
     status: 'in_progress',
@@ -75,8 +76,8 @@ export const enrollments: CourseEnrollment[] = [
     title: 'Workplace Safety',
     learnerId: 2,
     lessons: [
-      { id: 'l1', title: 'Hazards', completed: true },
-      { id: 'l2', title: 'Procedures', completed: false },
+      { id: 'l1', title: 'Hazards', completed: true, estimatedDurationMinutes: 10 },
+      { id: 'l2', title: 'Procedures', completed: false, estimatedDurationMinutes: 20 },
     ],
     lastActivityAt: daysAgo(3),
     status: 'in_progress',

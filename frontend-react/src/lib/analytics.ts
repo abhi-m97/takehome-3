@@ -9,7 +9,13 @@
  */
 
 type AnalyticsEvents = {
-  course_progress_viewed: { learnerId: number; courseCount: number; staleCount: number };
+  course_progress_viewed: {
+    learnerId: number;
+    courseCount: number;
+    staleCount: number;
+    /** Active time filter in minutes, or null for "any length". */
+    maxMinutes: number | null;
+  };
 };
 
 type Payload = {

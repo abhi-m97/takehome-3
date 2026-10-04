@@ -19,7 +19,9 @@ progressRouter.get(
       //     throw new ForbiddenError(`Learner ${req.authenticatedLearnerId} cannot access learner ${learnerId}'s progress`);
       //   }
 
-      const courses = getInProgressCourses(learnerId);
+      const maxMinutes = parseMaxMinutes(req.query.maxMinutes);
+
+      const courses = getInProgressCourses(learnerId, { maxMinutes });
       const body: LearnerProgressResponse = { learnerId, courses };
       res.json(body);
     } catch (error) {
@@ -38,4 +40,19 @@ function parseLearnerId(raw: string | string[]): number {
     throw new ValidationError(`Invalid learner ID: ${value}`);
   }
   return learnerId;
+}
+
+// A strict regex rather than Number(): Number('') is 0, Number(' 5 ') is 5 and
+// Number('1e2') is 100, so all of those would slip through as valid limits.
+function parseMaxMinutes(raw: unknown): number | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+  if (typeof raw === 'string' && /^[1-9][0-9]*$/.test(raw)) {
+    const maxMinutes = Number(raw);
+    if (Number.isSafeInteger(maxMinutes)) {
+      return maxMinutes;
+    }
+  }
+  throw new ValidationError(`Invalid maxMinutes: ${String(raw)}`);
 }

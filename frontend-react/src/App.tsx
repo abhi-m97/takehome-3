@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CourseCard } from './components/CourseCard';
 import { CourseListSkeleton } from './components/CourseListSkeleton';
 import { EmptyState } from './components/EmptyState';
+import { TimeFilter } from './components/TimeFilter';
 import { useLoadingIndicator } from './hooks/useLoadingIndicator';
 import { track } from './lib/analytics';
 import type { CourseProgress, LearnerProgressResponse } from './types';
@@ -24,10 +25,17 @@ const MIN_LOADING_UI_MS = 400;
 type ViewState =
   | { status: 'loading' }
   | { status: 'error'; message: string }
-  | { status: 'success'; courses: CourseProgress[] };
+  // maxMinutes is the filter the request was made with, so the empty-state copy always matches the data shown.
+  | { status: 'success'; courses: CourseProgress[]; maxMinutes: number | null };
 
 export function App() {
   const [learnerId, setLearnerId] = useState<string>(SCENARIOS[0].id);
+  // Reset together with learnerId (see handleLearnerChange): a different learner is a different session.
+  const [maxMinutes, setMaxMinutes] = useState<number | null>(null);
+  // Whether the learner has any in-progress courses, learned from an unfiltered load. null = not known yet.
+  const [learnerHasCourses, setLearnerHasCourses] = useState<boolean | null>(null);
+  // Demo-only flag; stands in for a real feature-flag service. Not persisted.
+  const [showNextLesson, setShowNextLesson] = useState(false);
   const [view, setView] = useState<ViewState>({ status: 'loading' });
   const showSkeleton = useLoadingIndicator(view.status === 'loading', {
     delayMs: LOADING_UI_DELAY_MS,
@@ -38,7 +46,10 @@ export function App() {
     const controller = new AbortController();
     setView({ status: 'loading' });
 
-    void fetch(`/api/learners/${encodeURIComponent(learnerId)}/progress`, {
+    const base = `/api/learners/${encodeURIComponent(learnerId)}/progress`;
+    const url = maxMinutes === null ? base : `${base}?maxMinutes=${maxMinutes}`;
+
+    void fetch(url, {
       signal: controller.signal,
     })
       .then(async (res) => {
@@ -52,8 +63,11 @@ export function App() {
           learnerId: responseLearnerId,
           courseCount: courses.length,
           staleCount: courses.filter((c) => c.isStale).length,
+          maxMinutes,
         });
-        setView({ status: 'success', courses });
+        // Only an unfiltered response tells us whether the learner has courses at all.
+        if (maxMinutes === null) setLearnerHasCourses(courses.length > 0);
+        setView({ status: 'success', courses, maxMinutes });
       })
       .catch((err: unknown) => {
         if (controller.signal.aborted) return; // superseded by a newer selection
@@ -64,28 +78,52 @@ export function App() {
       });
 
     return () => controller.abort();
-  }, [learnerId]);
+  }, [learnerId, maxMinutes]);
+
+  // One handler so React batches all three updates into a single render and a single fetch.
+  function handleLearnerChange(value: string) {
+    setLearnerId(value);
+    setMaxMinutes(null);
+    setLearnerHasCourses(null);
+  }
 
   return (
     <main className="page">
-      <div className="scenario-picker">
-        <label htmlFor="scenario">Scenario</label>
-        <select
-          id="scenario"
-          value={learnerId}
-          onChange={(e) => setLearnerId(e.target.value)}
-        >
-          {SCENARIOS.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.label} (ID: {s.id})
-            </option>
-          ))}
-        </select>
+      {/* Demo-only controls: the scenario picker stands in for a login, and the flag stands in for a real feature-flag service. */}
+      <div className="demo-controls">
+        <div className="scenario-picker">
+          <label htmlFor="scenario">Scenario</label>
+          <select
+            id="scenario"
+            value={learnerId}
+            onChange={(e) => handleLearnerChange(e.target.value)}
+          >
+            {SCENARIOS.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.label} (ID: {s.id})
+              </option>
+            ))}
+          </select>
+        </div>
+        <label className="demo-flag">
+          <input
+            type="checkbox"
+            checked={showNextLesson}
+            onChange={(e) => setShowNextLesson(e.target.checked)}
+          />
+          Experimental: next lesson preview
+        </label>
       </div>
 
       <p className="eyebrow">Docebo · pilot</p>
       <h1>My progress</h1>
       <p className="lede">In-progress courses for learner {learnerId}.</p>
+
+      <div className="time-filter-slot">
+        {learnerHasCourses === true ? (
+          <TimeFilter value={maxMinutes} onChange={setMaxMinutes} />
+        ) : null}
+      </div>
 
       {showSkeleton ? (
         <CourseListSkeleton />
@@ -97,12 +135,14 @@ export function App() {
             </p>
           ) : null}
 
-          {view.status === 'success' && view.courses.length === 0 ? <EmptyState /> : null}
+          {view.status === 'success' && view.courses.length === 0 ? (
+            <EmptyState maxMinutes={view.maxMinutes} onClear={() => setMaxMinutes(null)} />
+          ) : null}
 
           {view.status === 'success' && view.courses.length > 0 ? (
             <ul className="course-list">
               {view.courses.map((course, index) => (
-                <CourseCard key={course.courseId} course={course} index={index} />
+                <CourseCard key={course.courseId} course={course} index={index} showNextLesson={showNextLesson} />
               ))}
             </ul>
           ) : null}

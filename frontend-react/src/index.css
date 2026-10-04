@@ -46,9 +46,47 @@ h1 {
   padding: 1rem 1.1rem;
 }
 
+.course-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.7rem;
+}
+
 .course h2 {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-size: 1.05rem;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.progress {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #ece6de;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #c2410c;
+  transform-origin: left;
+}
+
+.progress-pct {
+  min-width: 2.75rem;
+  text-align: right;
+  font-size: 0.9rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 
 .meta {
@@ -58,11 +96,142 @@ h1 {
 }
 
 .badge {
-  display: inline-block;
-  margin-top: 0.65rem;
-  font-size: 0.72rem;
+  flex-shrink: 0;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #fef3c7;
+  font-size: 0.7rem;
   font-weight: 650;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #a16207;
+}
+
+/* Empty state */
+.empty {
+  padding: 2.5rem 1.25rem;
+  border: 1.5px dashed #d6cdc2;
+  border-radius: 10px;
+  background: #fffcf8;
+  text-align: center;
+  color: #57534e;
+}
+
+.empty-icon {
+  color: #c2410c;
+  margin-bottom: 0.5rem;
+}
+
+.empty h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  color: #1c1917;
+}
+
+.empty p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Loading state */
+.loading-text {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: #57534e;
+}
+
+.skeleton {
+  border-radius: 6px;
+  background: #ece6de;
+}
+
+.skeleton-title {
+  width: 55%;
+  height: 1.05rem;
+  margin-bottom: 0.9rem;
+}
+
+.skeleton-bar {
+  height: 8px;
+  margin-bottom: 0.85rem;
+  border-radius: 999px;
+}
+
+.skeleton-meta {
+  width: 40%;
+  height: 0.8rem;
+}
+
+/* Fade the later skeletons out to hint that the list length is unknown. */
+.course--skeleton:nth-child(2) {
+  opacity: 0.7;
+}
+
+.course--skeleton:nth-child(3) {
+  opacity: 0.4;
+}
+
+/* Motion (disabled for users who prefer reduced motion) */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
+  @keyframes grow {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes shimmer {
+    50% {
+      opacity: 0.55;
+    }
+  }
+
+  .fade-in {
+    animation: fade-in 0.25s ease-out both;
+    animation-delay: calc(var(--i, 0) * 40ms);
+  }
+
+  .progress-fill {
+    animation: grow 0.6s ease-out both;
+    animation-delay: calc(var(--i, 0) * 40ms + 100ms);
+  }
+
+  .course--skeleton .skeleton {
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+.scenario-picker {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #57534e;
+}
+
+.scenario-picker select {
+  font: inherit;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #e7e0d8;
+  border-radius: 6px;
+  background: #fffcf8;
+}
+
+.error {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
 }

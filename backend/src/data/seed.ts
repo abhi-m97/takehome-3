@@ -92,6 +92,17 @@ export const enrollments: CourseEnrollment[] = [
     lastActivityAt: daysAgo(106),
     status: 'completed',
   },
+  {
+    courseId: 'course-ethics',
+    title: 'Workplace Ethics',
+    learnerId: 3,
+    lessons: [
+      { id: 'l1', title: 'Code of conduct', completed: true },
+      { id: 'l2', title: 'Reporting concerns', completed: true },
+    ],
+    lastActivityAt: daysAgo(40),
+    status: 'completed',
+  },
 ];
 
 export const knownLearnerIds = new Set(

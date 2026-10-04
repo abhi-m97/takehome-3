@@ -1,0 +1,18 @@
+<main class="page">
+  <p class="eyebrow">Docebo · pilot</p>
+  <h1>My progress</h1>
+  <p class="lede">In-progress courses for learner {{ learnerId }}.</p>
+  @if (courses) {
+    <ul class="course-list">
+      @for (course of courses; track course.courseId) {
+        <li class="course">
+          <h2>{{ course.title }}</h2>
+          <p class="meta">{{ course.completionPercentage }}% · {{ course.lastActivityAt }}</p>
+          @if (course.isStale) {
+            <span class="badge">Inactive</span>
+          }
+        </li>
+      }
+    </ul>
+  }
+</main>

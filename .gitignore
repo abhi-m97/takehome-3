@@ -1,0 +1,45 @@
+# Dependencies (any package in the monorepo)
+node_modules/
+
+# Build output / caches
+dist/
+build/
+out/
+coverage/
+.angular/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Claude Code local config / state
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor / IDE (local settings only)
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.suo
+
+# NOTE: Intentionally TRACKED (do not ignore):
+#   - package-lock.json files (reproducible installs)
+#   - SPEC.md, README.md, *.template.md, PRODUCT.md, AI_USAGE.md
+#   - all source, tests, and config in backend/, frontend-angular/, frontend-react/
+#   - .cursor/ (rules / project context for future AI chats)

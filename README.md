@@ -59,7 +59,7 @@ slider resets when you change learner.
 *Network*, pick **Slow 4G**, then switch scenario or move the slider.
 
 **Experimental flag.** The **Experimental: next lesson preview** checkbox (top right, off by default) shows the next
-lesson and its length on each card. It is a demo-only stand-in for a feature flag and is not the assessed rule.
+lesson and its length on each card. It is a demo-only stand-in for a feature flag.
 
 **Analytics.** Each successful load logs one structured JSON line (`course_progress_viewed`, with learner ID, course
 count, stale count and the active time filter) to the browser console.
